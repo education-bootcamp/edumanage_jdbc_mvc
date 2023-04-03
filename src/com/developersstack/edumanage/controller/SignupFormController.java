@@ -68,6 +68,6 @@ public class SignupFormController {
         // create statement
         Statement statement = connection.createStatement();
         // set sql into the statement and execute
-        return statement.executeUpdate(sql)>0;
+        return statement.executeUpdate(sql)>0; // INSERT, UPDATE, DELETE
     }
 }
