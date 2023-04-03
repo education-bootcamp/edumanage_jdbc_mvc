@@ -41,13 +41,18 @@ public class SignupFormController {
         String lastName = txtLastName.getText();
         String password = new PasswordManager().encrypt(txtPassword.getText().trim());
         User createUser = new User(firstName, lastName, email, password);
-        boolean isSaved = signup(createUser);
-        if (isSaved){
-            new Alert(Alert.AlertType.INFORMATION, "Welcome!").show();
-            setUi("LoginForm");
-        }else{
-            new Alert(Alert.AlertType.WARNING, "Try Again!").show();
+        try {
+            boolean isSaved = signup(createUser);
+            if (isSaved){
+                new Alert(Alert.AlertType.INFORMATION, "Welcome!").show();
+                setUi("LoginForm");
+            }else{
+                new Alert(Alert.AlertType.WARNING, "Try Again!").show();
+            }
+        }catch (SQLException | ClassNotFoundException e1){
+            new Alert(Alert.AlertType.ERROR, e1.toString()).show();
         }
+
     }
 
     //================================
@@ -59,6 +64,7 @@ public class SignupFormController {
         DriverManager.getConnection("jdbc:mysql://localhost:3306/lms3","root","1234");
         // write a SQl
         String sql ="INSERT INTO User VALUES ('"+user.getEmail()+"','"+user.getFirstName()+"','"+user.getLastName()+"','"+user.getPassword()+"')";
+        // INSERT INTO user VALUES('h@gmail.com','hasika','sandaruwan','1234');
         // create statement
         Statement statement = connection.createStatement();
         // set sql into the statement and execute
