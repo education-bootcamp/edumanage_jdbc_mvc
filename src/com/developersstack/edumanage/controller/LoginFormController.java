@@ -29,33 +29,21 @@ public class LoginFormController {
     public void loginOnAction(ActionEvent actionEvent) throws IOException {
         String email = txtEmail.getText().toLowerCase();
         String password = txtPassword.getText().trim();
-
-       /* for (User user : Database.userTable){
-            if (user.getEmail().equals(email)){
-               if (user.getPassword().equals(password)){
-                   System.out.println(user.toString());
-                   return;
-               }else{
-                   new Alert(Alert.AlertType.ERROR,
-                          "Wrong Password!").show();
-                   return;
-               }
+        try{
+            User selectedUser = login(email);
+            if (null!=selectedUser){
+                if (new PasswordManager().checkPassword(password, selectedUser.getPassword())) {
+                    setUi("DashboardForm");
+                } else {
+                    new Alert(Alert.AlertType.ERROR,
+                            "Wrong Password!").show();
+                }
+            }else{
+                new Alert(Alert.AlertType.WARNING,
+                        String.format("user not found (%s)", email)).show();
             }
-        }
-        new Alert(Alert.AlertType.WARNING,
-                String.format("user not found (%s)",email)).show();*/
-        Optional<User> selectedUser =
-                Database.userTable.stream().filter(e -> e.getEmail().equals(email)).findFirst();
-        if (selectedUser.isPresent()) {
-            if (new PasswordManager().checkPassword(password, selectedUser.get().getPassword())) {
-                setUi("DashboardForm");
-            } else {
-                new Alert(Alert.AlertType.ERROR,
-                        "Wrong Password!").show();
-            }
-        } else {
-            new Alert(Alert.AlertType.WARNING,
-                    String.format("user not found (%s)", email)).show();
+        }catch (ClassNotFoundException | SQLException e){
+            new Alert(Alert.AlertType.ERROR, e.toString()).show();
         }
     }
 
@@ -86,6 +74,7 @@ public class LoginFormController {
             System.out.println(user);
             return user;
         }
+        return null;
     }
 
 }
