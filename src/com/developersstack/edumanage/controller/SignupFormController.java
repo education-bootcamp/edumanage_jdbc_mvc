@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class SignupFormController {
     public AnchorPane context;
@@ -58,5 +59,9 @@ public class SignupFormController {
         DriverManager.getConnection("jdbc:mysql://localhost:3306/lms3","root","1234");
         // write a SQl
         String sql ="INSERT INTO User VALUES ('"+user.getEmail()+"','"+user.getFirstName()+"','"+user.getLastName()+"','"+user.getPassword()+"')";
+        // create statement
+        Statement statement = connection.createStatement();
+        // set sql into the statement and execute
+        return statement.executeUpdate(sql)>0;
     }
 }
