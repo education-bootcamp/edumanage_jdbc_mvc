@@ -13,6 +13,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class SignupFormController {
     public AnchorPane context;
@@ -47,7 +50,13 @@ public class SignupFormController {
     }
 
     //================================
-    private boolean signup(User user){
-        // save (database)
+    private boolean signup(User user) throws ClassNotFoundException, SQLException {
+        // load the driver
+        Class.forName("com.mysql.cj.jdbc.Driver"); // com.mysql.jdbc.Driver(deprecate)
+        // Create a Connection
+        Connection connection =
+        DriverManager.getConnection("jdbc:mysql://localhost:3306/lms3","root","1234");
+        // write a SQl
+        String sql ="INSERT INTO User VALUES ('"+user.getEmail()+"','"+user.getFirstName()+"','"+user.getLastName()+"','"+user.getPassword()+"')";
     }
 }
