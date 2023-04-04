@@ -14,10 +14,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -113,19 +110,21 @@ public class StudentFormController {
     }
 
     private void setStudentId() {
-        if (!Database.studentTable.isEmpty()){
-            Student lastStudent = Database.studentTable.get(
-                    Database.studentTable.size()-1
-            );
-            String lastId= lastStudent.getStudentId();
-            String splitData[] = lastId.split("-");
-            String lastIdIntegerNumberAsAString = splitData[1];
-            int lastIntegerIdAsInt=Integer.parseInt(lastIdIntegerNumberAsAString);
-            lastIntegerIdAsInt++;
-            String generatedStudentId="S-"+lastIntegerIdAsInt;
-            txtId.setText(generatedStudentId);
-        }else{
-            txtId.setText("S-1");
+
+        try{
+            String lastId = getLastId();
+            if (null!=lastId){
+                String splitData[] = lastId.split("-");
+                String lastIdIntegerNumberAsAString = splitData[1];
+                int lastIntegerIdAsInt=Integer.parseInt(lastIdIntegerNumberAsAString);
+                lastIntegerIdAsInt++;
+                String generatedStudentId="S-"+lastIntegerIdAsInt;
+                txtId.setText(generatedStudentId);
+            }else{
+                txtId.setText("S-1");
+            }
+        }catch (SQLException | ClassNotFoundException e){
+            e.printStackTrace();
         }
     }
 
@@ -203,5 +202,18 @@ public class StudentFormController {
         preparedStatement.setObject(3,student.getDateOfBirth());
         preparedStatement.setString(4,student.getAddress());
         return preparedStatement.executeUpdate()>0;
+    }
+
+    private String getLastId() throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection =
+                DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lms3","root","1234");
+        PreparedStatement preparedStatement =
+                connection.prepareStatement("SELECT student_id FROM student ORDER BY CAST(SUBSTRING(student_id,3) AS UNSIGNED ) DESC LIMIT 1");
+        ResultSet resultSet = preparedStatement.executeQuery();
+        if (resultSet.next()){
+            return resultSet.getString(1);
+        }
+        return null;
     }
 }
