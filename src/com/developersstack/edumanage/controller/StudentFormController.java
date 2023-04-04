@@ -96,10 +96,19 @@ public class StudentFormController {
                     );
                     Optional<ButtonType> buttonType = alert.showAndWait();
                     if (buttonType.get().equals(ButtonType.YES)) {
-                        Database.studentTable.remove(st);
-                        new Alert(Alert.AlertType.INFORMATION, "Deleted!").show();
-                        setTableData(searchText);
-                        setStudentId();
+
+                        try {
+                            if(deleteStudent(st.getStudentId())){
+                                new Alert(Alert.AlertType.INFORMATION, "Deleted!").show();
+                                setTableData(searchText);
+                                setStudentId();
+                            }else{
+                                new Alert(Alert.AlertType.WARNING, "Try Again!").show();
+                            }
+                        } catch (ClassNotFoundException | SQLException ex) {
+                            new Alert(Alert.AlertType.ERROR, e.toString()).show();
+                        }
+
                     }
                 });
                 obList.add(tm);
@@ -131,13 +140,13 @@ public class StudentFormController {
     }
 
     public void saveOnAction(ActionEvent actionEvent) {
+        Student student = new Student(
+                txtId.getText(),
+                txtName.getText(),
+                Date.from(txtDob.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                txtAddress.getText()
+        );
         if (btn.getText().equalsIgnoreCase("Save Student")) {
-            Student student = new Student(
-                    txtId.getText(),
-                    txtName.getText(),
-                    Date.from(txtDob.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                    txtAddress.getText()
-            );
             try {
                 if (saveStudent(student)) {
                     setStudentId();
@@ -152,20 +161,18 @@ public class StudentFormController {
             }
 
         } else {
-            for (Student st : Database.studentTable
-            ) {
-                if (st.getStudentId().equals(txtId.getText())) {
-                    st.setAddress(txtAddress.getText());
-                    st.setFullName(txtName.getText());
-                    st.setDateOfBirth(Date.from(txtDob.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-                    setTableData(searchText);
+
+            try {
+                if (updateStudent(student)) {
                     clear();
-                    setStudentId();
-                    btn.setText("Save Student");
-                    return;
+                    setTableData(searchText);
+                    new Alert(Alert.AlertType.INFORMATION, "Student Updated!").show();
+                } else {
+                    new Alert(Alert.AlertType.WARNING, "Try Again!").show();
                 }
+            } catch (SQLException | ClassNotFoundException e) {
+                new Alert(Alert.AlertType.ERROR, e.toString()).show();
             }
-            new Alert(Alert.AlertType.WARNING, "Not Found").show();
         }
     }
 
@@ -241,6 +248,29 @@ public class StudentFormController {
             );
         }
         return list;
+    }
+
+    private boolean deleteStudent(String id) throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection =
+                DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lms3", "root", "1234");
+        PreparedStatement preparedStatement =
+                connection.prepareStatement("DELETE FROM student WHERE student_id=?");
+        preparedStatement.setString(1,id);
+        return preparedStatement.executeUpdate()>0;
+    }
+
+    private boolean updateStudent(Student student) throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection =
+                DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lms3", "root", "1234");
+        PreparedStatement preparedStatement =
+                connection.prepareStatement("UPDATE student SET full_name=?, dob=?, address=? WHERE student_id=?");
+        preparedStatement.setString(1, student.getFullName());
+        preparedStatement.setObject(2, student.getDateOfBirth());
+        preparedStatement.setString(3, student.getAddress());
+        preparedStatement.setString(4, student.getStudentId());
+        return preparedStatement.executeUpdate() > 0;
     }
 
 }
