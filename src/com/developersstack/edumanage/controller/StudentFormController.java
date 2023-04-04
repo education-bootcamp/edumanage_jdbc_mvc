@@ -14,6 +14,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -133,11 +137,19 @@ public class StudentFormController {
                     Date.from(txtDob.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()),
                     txtAddress.getText()
             );
-            Database.studentTable.add(student);
-            setStudentId();
-            clear();
-            setTableData(searchText);
-            new Alert(Alert.AlertType.INFORMATION, "Student saved!").show();
+            try {
+                if (saveStudent(student)){
+                    setStudentId();
+                    clear();
+                    setTableData(searchText);
+                    new Alert(Alert.AlertType.INFORMATION, "Student saved!").show();
+                }else{
+                    new Alert(Alert.AlertType.WARNING, "Try Again!").show();
+                }
+            }catch (SQLException | ClassNotFoundException e){
+                new Alert(Alert.AlertType.ERROR, e.toString()).show();
+            }
+
         }else{
             for (Student st:Database.studentTable
                  ) {
@@ -178,5 +190,18 @@ public class StudentFormController {
 
     public void backToHomeOnAction(ActionEvent actionEvent) throws IOException {
         setUi("DashboardForm");
+    }
+
+    private boolean saveStudent(Student student) throws ClassNotFoundException, SQLException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection connection =
+                DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lms3","root","1234");
+        PreparedStatement preparedStatement =
+                connection.prepareStatement("INSERT INTO student VALUES(?,?,?,?)");
+        preparedStatement.setString(1,student.getStudentId());
+        preparedStatement.setString(2,student.getFullName());
+        preparedStatement.setObject(3,student.getDateOfBirth());
+        preparedStatement.setString(4,student.getAddress());
+        return preparedStatement.executeUpdate()>0;
     }
 }
