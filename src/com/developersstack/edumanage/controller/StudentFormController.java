@@ -1,6 +1,7 @@
 package com.developersstack.edumanage.controller;
 
 import com.developersstack.edumanage.db.Database;
+import com.developersstack.edumanage.db.DbConnection;
 import com.developersstack.edumanage.model.Student;
 import com.developersstack.edumanage.view.tm.StudentTm;
 import javafx.collections.FXCollections;
@@ -202,8 +203,7 @@ public class StudentFormController {
 
     private boolean saveStudent(Student student) throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection connection =
-                DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lms3", "root", "1234");
+        Connection connection = DbConnection.getInstance().getConnection();
         PreparedStatement preparedStatement =
                 connection.prepareStatement("INSERT INTO student VALUES(?,?,?,?)");
         preparedStatement.setString(1, student.getStudentId());
@@ -214,9 +214,7 @@ public class StudentFormController {
     }
 
     private String getLastId() throws ClassNotFoundException, SQLException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection connection =
-                DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lms3", "root", "1234");
+        Connection connection = DbConnection.getInstance().getConnection();
         PreparedStatement preparedStatement =
                 connection.prepareStatement("SELECT student_id FROM student ORDER BY CAST(SUBSTRING(student_id,3) AS UNSIGNED ) DESC LIMIT 1");
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -229,8 +227,7 @@ public class StudentFormController {
     private List<Student> searchStudents(String text) throws ClassNotFoundException, SQLException {
         text = "%" + text + "%";// %text%
         Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection connection =
-                DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lms3", "root", "1234");
+        Connection connection = DbConnection.getInstance().getConnection();
         PreparedStatement preparedStatement =
                 connection.prepareStatement("SELECT * FROM student WHERE full_name LIKE ? OR address LIKE ?");
         preparedStatement.setString(1,text);
@@ -251,9 +248,7 @@ public class StudentFormController {
     }
 
     private boolean deleteStudent(String id) throws ClassNotFoundException, SQLException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection connection =
-                DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lms3", "root", "1234");
+        Connection connection = DbConnection.getInstance().getConnection();
         PreparedStatement preparedStatement =
                 connection.prepareStatement("DELETE FROM student WHERE student_id=?");
         preparedStatement.setString(1,id);
@@ -261,9 +256,7 @@ public class StudentFormController {
     }
 
     private boolean updateStudent(Student student) throws ClassNotFoundException, SQLException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection connection =
-                DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lms3", "root", "1234");
+        Connection connection = DbConnection.getInstance().getConnection();
         PreparedStatement preparedStatement =
                 connection.prepareStatement("UPDATE student SET full_name=?, dob=?, address=? WHERE student_id=?");
         preparedStatement.setString(1, student.getFullName());

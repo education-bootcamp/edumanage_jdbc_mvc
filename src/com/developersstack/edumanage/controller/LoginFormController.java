@@ -1,6 +1,7 @@
 package com.developersstack.edumanage.controller;
 
 import com.developersstack.edumanage.db.Database;
+import com.developersstack.edumanage.db.DbConnection;
 import com.developersstack.edumanage.model.User;
 import com.developersstack.edumanage.util.security.PasswordManager;
 import javafx.event.ActionEvent;
@@ -59,11 +60,9 @@ public class LoginFormController {
     }
 
     private User login(String email) throws ClassNotFoundException, SQLException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection connection =
-                DriverManager.getConnection("jdbc:mysql://localhost:3306/lms3", "root", "1234");
+        Connection connection = DbConnection.getInstance().getConnection();
         String sql = "SELECT * FROM user WHERE email=?";
-        System.out.println(sql);
+        System.out.println(connection);
         PreparedStatement statement = connection.prepareStatement(sql);
         statement.setString(1,email);
         ResultSet resultSet = statement.executeQuery(); // SELECT
