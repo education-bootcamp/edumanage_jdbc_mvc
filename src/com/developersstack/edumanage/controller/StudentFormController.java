@@ -226,7 +226,8 @@ public class StudentFormController {
                 DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/lms3", "root", "1234");
         PreparedStatement preparedStatement =
                 connection.prepareStatement("SELECT * FROM student WHERE full_name LIKE ? OR address LIKE ?");
-        preparedStatement.setString(1,searchText);
+        preparedStatement.setString(1,text);
+        preparedStatement.setString(2,text);
         ResultSet resultSet = preparedStatement.executeQuery();
         List<Student> list = new ArrayList<>();
         while (resultSet.next()) {
